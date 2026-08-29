@@ -1,141 +1,318 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ペアくじ</title>
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f7f5f0;
-      color: #333;
-      text-align: center;
-      margin: 0;
-      padding: 30px 20px;
-    }
-    h1 {
-      font-size: 32px;
-      margin-bottom: 8px;
-      cursor: pointer;
-      user-select: none;
-    }
-    .subtitle {
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 24px;
-    }
-    .card {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      max-width: 400px;
-      margin: 0 auto 20px;
-    }
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 8px;
-      text-align: left;
-    }
-    input[type="number"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      margin-bottom: 16px;
-    }
-    button {
-      background-color: #007aff;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      width: 100%;
-    }
-    button:active {
-      opacity: 0.8;
-    }
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      text-align: left;
-    }
-    .pair-item {
-      background: #f9f9f9;
-      padding: 10px;
-      border-radius: 6px;
-      margin-bottom: 8px;
-      border-left: 4px solid #007aff;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ペアくじ</title>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  background: #f7f5f0;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 30px 20px;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.subtitle {
+  color: #777;
+  margin-bottom: 30px;
+}
+
+.card {
+  max-width: 420px;
+  margin: auto;
+  background: white;
+  border-radius: 24px;
+  padding: 30px 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 12px;
+  font-size: 18px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+#number {
+  font-size: 18px;
+  color: #777;
+}
+
+#result {
+  font-size: 100px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  width: 100%;
+  padding: 18px;
+  font-size: 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  background: #333;
+  color: white;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #aaa;
+}
+
+button.secondary-btn {
+  background: #007aff;
+  margin-top: 15px;
+}
+
+button.reset-btn {
+  background: #8e8e93;
+  margin-top: 15px;
+  padding: 12px;
+  font-size: 15px;
+}
+
+.note {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #888;
+}
+
+.history {
+  margin-top: 25px;
+  text-align: left;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.history div {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+</style>
 </head>
+
 <body>
 
-  <!-- ダブルタップ/ダブルクリックでリセットを実行 -->
-  <h1 id="title" ondblclick="resetApp()">ペアくじ</h1>
-  <div class="subtitle">（タイトルをダブルタップでリセット）</div>
+<h1 id="title">🎲 ペアくじ</h1>
+<div class="subtitle">（ダブルタップでリセット）</div>
 
-  <div class="card">
-    <label for="memberCount">参加人数</label>
-    <!-- 人数を都度変更可能 -->
-    <input type="number" id="memberCount" min="2" value="4" placeholder="人数を入力">
+<div class="card">
 
-    <button onclick="generatePairs()">ペアを作成する</button>
-
-    <div id="result"></div>
+  <!-- 設定エリア -->
+  <div id="setupArea">
+    <label for="memberInput">参加人数を入力してください</label>
+    <input type="number" id="memberInput" min="2" value="10">
+    <button onclick="startLottery()">くじを作成する</button>
   </div>
 
-  <script>
-    function generatePairs() {
-      const countInput = document.getElementById('memberCount');
-      const count = parseInt(countInput.value, 10);
-      const resultDiv = document.getElementById('result');
+  <!-- くじ引きエリア -->
+  <div id="lotteryArea" style="display: none;">
+    <div id="roundInfo" style="font-weight: bold; color: #007aff; margin-bottom: 10px;">第1回目</div>
+    <div id="number">1人目</div>
 
-      if (isNaN(count) || count < 2) {
-        alert('2人以上の人数を入力してください。');
-        return;
-      }
+    <div id="result">？</div>
 
-      // 参加者リストの生成（例: 1番〜N番）
-      let members = [];
-      for (let i = 1; i <= count; i++) {
-        members.push(`参加者 ${i}`);
-      }
+    <button id="drawButton" onclick="draw()">くじを引く</button>
 
-      // シャッフル（フィッシャー–イエーツのシャッフル）
-      for (let i = members.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [members[i], members[j]] = [members[j], members[i]];
-      }
+    <div class="note" id="noteText">
+      順番にくじを引いてね！
+    </div>
 
-      // ペア組みの出力
-      let html = '<h3>結果</h3>';
-      let groupIndex = 1;
-      for (let i = 0; i < members.length; i += 2) {
-        if (i + 1 < members.length) {
-          html += `<div class="pair-item">グループ ${groupIndex}: ${members[i]} & ${members[i+1]}</div>`;
-        } else {
-          html += `<div class="pair-item">グループ ${groupIndex}: ${members[i]}（あまり）</div>`;
-        }
-        groupIndex++;
-      }
+    <div class="history" id="history"></div>
 
-      resultDiv.innerHTML = html;
+    <!-- 2回目用ボタン -->
+    <button id="nextRoundBtn" class="secondary-btn" style="display: none;" onclick="prepareNextRound()">2回目を開始する（別ペア）</button>
+    <button class="reset-btn" onclick="resetApp()">人数変更・最初から</button>
+  </div>
+
+</div>
+
+<script>
+// 使用するマークのプール
+const SYMBOL_POOL = ["🌸","🍀","⭐️","🌈","🍎","🌙","⚡️","🎈","🎲","💎","🎨","⚽️","🐱","🥑"];
+
+let totalMembers = 10;
+let currentMarks = [];
+let count = 0;
+let roundCount = 1;
+let historyPairs = []; // 過去にペアになった組み合わせの記録
+
+// くじの開始（初期化）
+function startLottery() {
+  const val = parseInt(document.getElementById("memberInput").value, 10);
+  if (isNaN(val) || val < 2) {
+    alert("2人以上の人数を入力してください。");
+    return;
+  }
+  totalMembers = val;
+  roundCount = 1;
+  historyPairs = [];
+
+  document.getElementById("setupArea").style.display = "none";
+  document.getElementById("lotteryArea").style.display = "block";
+
+  setupRound();
+}
+
+// ラウンドごとのセットアップ
+function setupRound() {
+  count = 0;
+  document.getElementById("roundInfo").textContent = `第${roundCount}回目`;
+  document.getElementById("number").textContent = "1人目";
+  document.getElementById("result").textContent = "？";
+  document.getElementById("history").innerHTML = "";
+  document.getElementById("drawButton").disabled = false;
+  document.getElementById("drawButton").textContent = "くじを引く";
+  document.getElementById("nextRoundBtn").style.display = "none";
+
+  // 被りのない組み合わせができるまで割り当てを生成（最大100回試行）
+  let valid = false;
+  let attempts = 0;
+  while (!valid && attempts < 100) {
+    attempts++;
+    currentMarks = generateMarks(totalMembers);
+    valid = checkValidity(currentMarks);
+  }
+}
+
+// マークの配分とシャッフル（奇数の場合は最後のマークを3人分にする）
+function generateMarks(num) {
+  let list = [];
+  let symbolIdx = 0;
+  let rem = num;
+
+  while (rem > 0) {
+    const symbol = SYMBOL_POOL[symbolIdx % SYMBOL_POOL.length];
+    if (rem === 3) {
+      list.push(symbol, symbol, symbol);
+      rem -= 3;
+    } else {
+      list.push(symbol, symbol);
+      rem -= 2;
+      symbolIdx++;
     }
+  }
 
-    // ダブルタップ / ダブルクリック時のリセット処理
-    function resetApp() {
-      document.getElementById('memberCount').value = 4;
-      document.getElementById('result').innerHTML = '';
-      alert('リセットしました。');
+  // シャッフル
+  for (let i = list.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  return list;
+}
+
+// 過去のペアと重複していないか判定
+function checkValidity(marksList) {
+  if (historyPairs.length === 0) return true;
+
+  const groups = {};
+  marksList.forEach((mark, idx) => {
+    if (!groups[mark]) groups[mark] = [];
+    groups[mark].push(idx);
+  });
+
+  for (let mark in groups) {
+    const group = groups[mark];
+    for (let pastSet of historyPairs) {
+      let matchCount = 0;
+      for (let memberIdx of group) {
+        if (pastSet.has(memberIdx)) matchCount++;
+      }
+      if (matchCount >= 2) return false; // すでに一度組んだ組み合わせがあればNG
     }
-  </script>
+  }
+  return true;
+}
+
+// くじを引く動作
+function draw() {
+  const mark = currentMarks[count];
+  count++;
+
+  document.getElementById("result").textContent = mark;
+
+  const history = document.getElementById("history");
+  history.innerHTML +=
+    "<div><span>" + count + "人目</span><strong>" + mark + "</strong></div>";
+
+  if (count < totalMembers) {
+    document.getElementById("number").textContent = (count + 1) + "人目";
+  } else {
+    document.getElementById("number").textContent = "全員終了！🎉";
+    document.getElementById("drawButton").disabled = true;
+    document.getElementById("drawButton").textContent = "くじ終了";
+    
+    // 現在のペア（または3人組）を履歴に保存
+    saveCurrentPairs();
+    
+    // 2回目ボタンを表示
+    document.getElementById("nextRoundBtn").style.display = "block";
+  }
+}
+
+// 今回のペアを記録
+function saveCurrentPairs() {
+  const groups = {};
+  currentMarks.forEach((mark, idx) => {
+    if (!groups[mark]) groups[mark] = [];
+    groups[mark].push(idx);
+  });
+  for (let mark in groups) {
+    historyPairs.push(new Set(groups[mark]));
+  }
+}
+
+// 2回目の準備
+function prepareNextRound() {
+  roundCount++;
+  setupRound();
+}
+
+// リセット処理
+function resetApp() {
+  document.getElementById("setupArea").style.display = "block";
+  document.getElementById("lotteryArea").style.display = "none";
+}
+
+// タイトルのダブルタップで全リセット
+let lastTap = 0;
+document.getElementById("title").addEventListener("click", function(e) {
+  const currentTime = new Date().getTime();
+  const tapLength = currentTime - lastTap;
+  if (tapLength < 300 && tapLength > 0) {
+    resetApp();
+    e.preventDefault();
+  }
+  lastTap = currentTime;
+});
+</script>
 
 </body>
 </html>
