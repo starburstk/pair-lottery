@@ -84,6 +84,11 @@ button:disabled {
   background: #aaa;
 }
 
+button.next-user-btn {
+  background: #4cd964;
+  margin-top: 10px;
+}
+
 button.secondary-btn {
   background: #007aff;
   margin-top: 15px;
@@ -139,10 +144,13 @@ button.reset-btn {
 
     <div id="result">？</div>
 
+    <!-- くじを引くボタン -->
     <button id="drawButton" onclick="draw()">くじを引く</button>
+    <!-- 次の人へ渡す（隠す）ステップ用のボタン -->
+    <button id="hideButton" class="next-user-btn" style="display: none;" onclick="prepareNextUser()">確認した（画面を隠す）</button>
 
     <div class="note" id="noteText">
-      順番にくじを引いてね！
+      ボタンを押してくじを引いてね！
     </div>
 
     <div class="history" id="history"></div>
@@ -155,16 +163,14 @@ button.reset-btn {
 </div>
 
 <script>
-// 使用するマークのプール
 const SYMBOL_POOL = ["🌸","🍀","⭐️","🌈","🍎","🌙","⚡️","🎈","🎲","💎","🎨","⚽️","🐱","🥑"];
 
 let totalMembers = 10;
 let currentMarks = [];
 let count = 0;
 let roundCount = 1;
-let historyPairs = []; // 過去にペアになった組み合わせの記録
+let historyPairs = [];
 
-// くじの開始（初期化）
 function startLottery() {
   const val = parseInt(document.getElementById("memberInput").value, 10);
   if (isNaN(val) || val < 2) {
@@ -181,18 +187,18 @@ function startLottery() {
   setupRound();
 }
 
-// ラウンドごとのセットアップ
 function setupRound() {
   count = 0;
   document.getElementById("roundInfo").textContent = `第${roundCount}回目`;
   document.getElementById("number").textContent = "1人目";
   document.getElementById("result").textContent = "？";
   document.getElementById("history").innerHTML = "";
+  document.getElementById("drawButton").style.display = "block";
   document.getElementById("drawButton").disabled = false;
   document.getElementById("drawButton").textContent = "くじを引く";
+  document.getElementById("hideButton").style.display = "none";
   document.getElementById("nextRoundBtn").style.display = "none";
 
-  // 被りのない組み合わせができるまで割り当てを生成（最大100回試行）
   let valid = false;
   let attempts = 0;
   while (!valid && attempts < 100) {
@@ -202,7 +208,6 @@ function setupRound() {
   }
 }
 
-// マークの配分とシャッフル（奇数の場合は最後のマークを3人分にする）
 function generateMarks(num) {
   let list = [];
   let symbolIdx = 0;
@@ -220,7 +225,6 @@ function generateMarks(num) {
     }
   }
 
-  // シャッフル
   for (let i = list.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [list[i], list[j]] = [list[j], list[i]];
@@ -228,7 +232,6 @@ function generateMarks(num) {
   return list;
 }
 
-// 過去のペアと重複していないか判定
 function checkValidity(marksList) {
   if (historyPairs.length === 0) return true;
 
@@ -245,7 +248,7 @@ function checkValidity(marksList) {
       for (let memberIdx of group) {
         if (pastSet.has(memberIdx)) matchCount++;
       }
-      if (matchCount >= 2) return false; // すでに一度組んだ組み合わせがあればNG
+      if (matchCount >= 2) return false;
     }
   }
   return true;
@@ -262,22 +265,27 @@ function draw() {
   history.innerHTML +=
     "<div><span>" + count + "人目</span><strong>" + mark + "</strong></div>";
 
+  document.getElementById("drawButton").style.display = "none";
+
   if (count < totalMembers) {
-    document.getElementById("number").textContent = (count + 1) + "人目";
+    // まだ残りの人がいる場合、「確認した（隠す）」ボタンを表示
+    document.getElementById("hideButton").style.display = "block";
   } else {
+    // 全員引いた場合
     document.getElementById("number").textContent = "全員終了！🎉";
-    document.getElementById("drawButton").disabled = true;
-    document.getElementById("drawButton").textContent = "くじ終了";
-    
-    // 現在のペア（または3人組）を履歴に保存
     saveCurrentPairs();
-    
-    // 2回目ボタンを表示
     document.getElementById("nextRoundBtn").style.display = "block";
   }
 }
 
-// 今回のペアを記録
+// 次の人へ交代する際、画面をリセット（？に戻す）するワンステップ
+function prepareNextUser() {
+  document.getElementById("result").textContent = "？";
+  document.getElementById("number").textContent = (count + 1) + "人目";
+  document.getElementById("hideButton").style.display = "none";
+  document.getElementById("drawButton").style.display = "block";
+}
+
 function saveCurrentPairs() {
   const groups = {};
   currentMarks.forEach((mark, idx) => {
@@ -289,19 +297,16 @@ function saveCurrentPairs() {
   }
 }
 
-// 2回目の準備
 function prepareNextRound() {
   roundCount++;
   setupRound();
 }
 
-// リセット処理
 function resetApp() {
   document.getElementById("setupArea").style.display = "block";
   document.getElementById("lotteryArea").style.display = "none";
 }
 
-// タイトルのダブルタップで全リセット
 let lastTap = 0;
 document.getElementById("title").addEventListener("click", function(e) {
   const currentTime = new Date().getTime();
