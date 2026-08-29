@@ -163,7 +163,8 @@ button.reset-btn {
 </div>
 
 <script>
-const SYMBOL_POOL = ["🌸","🍀","⭐️","🌈","🍎","🌙","⚡️","🎈","🎲","💎","🎨","⚽️","🐱","🥑"];
+// 分かりやすい絵文字リスト（🌸, 🍀, ⭐️, 🌻, 🍎, 🌙, 🎈, 🎲, 💎, ⚽️, 🐱, 🍓, 🍌, 🎁）
+const SYMBOL_POOL = ["🌸","🍀","⭐️","🌻","🍎","🌙","🎈","🎲","💎","⚽️","🐱","🍓","🍌","🎁"];
 
 let totalMembers = 10;
 let currentMarks = [];
@@ -254,7 +255,6 @@ function checkValidity(marksList) {
   return true;
 }
 
-// くじを引く動作
 function draw() {
   const mark = currentMarks[count];
   count++;
@@ -268,17 +268,14 @@ function draw() {
   document.getElementById("drawButton").style.display = "none";
 
   if (count < totalMembers) {
-    // まだ残りの人がいる場合、「確認した（隠す）」ボタンを表示
     document.getElementById("hideButton").style.display = "block";
   } else {
-    // 全員引いた場合
     document.getElementById("number").textContent = "全員終了！🎉";
     saveCurrentPairs();
     document.getElementById("nextRoundBtn").style.display = "block";
   }
 }
 
-// 次の人へ交代する際、画面をリセット（？に戻す）するワンステップ
 function prepareNextUser() {
   document.getElementById("result").textContent = "？";
   document.getElementById("number").textContent = (count + 1) + "人目";
