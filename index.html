@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ペアくじ</title>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  background: #f7f5f0;
+  color: #333;
+  text-align: center;
+  margin: 0;
+  padding: 30px 20px;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  color: #777;
+  margin-bottom: 30px;
+}
+
+.card {
+  max-width: 420px;
+  margin: auto;
+  background: white;
+  border-radius: 24px;
+  padding: 30px 20px;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+#number {
+  font-size: 18px;
+  color: #777;
+}
+
+#result {
+  font-size: 100px;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button {
+  width: 100%;
+  padding: 18px;
+  font-size: 20px;
+  font-weight: bold;
+  border: none;
+  border-radius: 16px;
+  background: #333;
+  color: white;
+}
+
+button:disabled {
+  background: #aaa;
+}
+
+.note {
+  margin-top: 18px;
+  font-size: 14px;
+  color: #888;
+}
+
+.history {
+  margin-top: 25px;
+  text-align: left;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.history div {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎲 ペアくじ</h1>
+<div class="subtitle">同じマークの人を探してペアになろう！</div>
+
+<div class="card">
+
+  <div id="number">1人目</div>
+
+  <div id="result">？</div>
+
+  <button id="drawButton" onclick="draw()">くじを引く</button>
+
+  <div class="note">
+    くじは全部で10個。<br>
+    同じマークが必ず2つずつ入っています。
+  </div>
+
+  <div class="history" id="history"></div>
+
+</div>
+
+<script>
+
+const marks = [
+  "🌸","🌸",
+  "🍀","🍀",
+  "⭐️","⭐️",
+  "🌈","🌈",
+  "🍎","🍎"
+];
+
+/* くじをランダムに並べ替える */
+for (let i = marks.length - 1; i > 0; i--) {
+  const j = Math.floor(Math.random() * (i + 1));
+  [marks[i], marks[j]] = [marks[j], marks[i]];
+}
+
+let count = 0;
+
+function draw() {
+
+  const mark = marks[count];
+
+  count++;
+
+  document.getElementById("result").textContent = mark;
+
+  const history = document.getElementById("history");
+
+  history.innerHTML +=
+    "<div><span>" + count + "人目</span><strong>" + mark + "</strong></div>";
+
+  if (count < 10) {
+    document.getElementById("number").textContent =
+      (count + 1) + "人目";
+  } else {
+    document.getElementById("number").textContent =
+      "全員終了！🎉";
+
+    document.getElementById("drawButton").disabled = true;
+    document.getElementById("drawButton").textContent =
+      "くじ終了";
+  }
+}
+
+</script>
+
+</body>
+</html>
